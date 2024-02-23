@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 
 class OrderController extends Controller
@@ -16,8 +17,8 @@ class OrderController extends Controller
         // Get the authenticated user's ID
         $userId = Auth::id();
 
-        // Validate the incoming request data
-        $request->validate([
+        // Define the validation rules
+        $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
             'address_id' => 'required|string',
             'phone' => 'required|string',
@@ -26,6 +27,11 @@ class OrderController extends Controller
             'data' => 'required|json',
             'note' => 'nullable|string',
         ]);
+
+        // If validation fails, return error response
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
 
         // Create a new order
         $order = Order::create([
@@ -50,35 +56,40 @@ class OrderController extends Controller
         // Update the total_price field in the Order table
         $order->update(['total_price' => $totalPrice]);
 
-        // Return a response
+        // Return a success response
         return response()->json(['message' => 'Order created successfully'], 201);
     }
     public function update(Request $request, $orderId)
-{
-    // Validate the incoming request data
-    $request->validate([
-        'address_id' => 'string',
-        'delivery_id' => 'string',
-        'status_id' => 'string',
-        'phone' => 'string',
-        'note' => 'nullable|string',
-    ]);
+    {
+        // Define the validation rules
+        $validator = Validator::make($request->all(), [
+            'address_id' => 'string',
+            'delivery_id' => 'string',
+            'status_id' => 'string',
+            'phone' => 'string',
+            'note' => 'nullable|string',
+        ]);
 
-    // Find the order by ID
-    $order = Order::findOrFail($orderId);
+        // If validation fails, return error response
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
 
-    // Update the order details
-    $order->update([
-        'address_id' => $request->input('address_id', $order->address),
-        'delivery_id' => $request->input('delivery_id', $order->delivery_id),
-        'status_id' => $request->input('status_id', $order->status_id),
-        'phone' => $request->input('phone', $order->phone),
-        'note' => $request->input('note', $order->note),
-    ]);
+        // Find the order by ID
+        $order = Order::findOrFail($orderId);
 
-    // Return a response
-    return response()->json(['message' => 'Order updated successfully'], 200);
-}
+        // Update the order details
+        $order->update([
+            'address_id' => $request->input('address_id', $order->address),
+            'delivery_id' => $request->input('delivery_id', $order->delivery_id),
+            'status_id' => $request->input('status_id', $order->status_id),
+            'phone' => $request->input('phone', $order->phone),
+            'note' => $request->input('note', $order->note),
+        ]);
+
+        // Return a success response
+        return response()->json(['message' => 'Order updated successfully'], 200);
+    }
 public function destroy($orderId)
 {
     // Find the order by ID

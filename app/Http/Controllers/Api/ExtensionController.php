@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Extension;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ExtensionController extends Controller
 {
@@ -19,44 +20,52 @@ class ExtensionController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'product_id' => 'required|integer',
-            'name' => 'required|string',
-            'data' => 'required|array',
-        ]);
+{
+    $validator = Validator::make($request->all(), [
+        'product_id' => 'required|integer',
+        'name' => 'required|string',
+        'data' => 'required|array',
+    ]);
 
-        $extension = Extension::create([
-            'product_id' => $request->input('product_id'),
-            'name' => $request->input('name'),
-            'data' => $request->input('data'),
-        ]);
-
-        return response()->json(['extension' => $extension], 201);
+    if ($validator->fails()) {
+        return response()->json(['error' => $validator->errors()], 400);
     }
 
-    public function update(Request $request, $product_id, $extension_id)
-    {
-        $request->validate([
-            'name' => 'required|string',
-            'data' => 'required|array',
-        ]);
+    $extension = Extension::create([
+        'product_id' => $request->input('product_id'),
+        'name' => $request->input('name'),
+        'data' => $request->input('data'),
+    ]);
 
-        $extension = Extension::where('product_id', $product_id)
-            ->where('id', $extension_id)
-            ->first();
+    return response()->json(['extension' => $extension], 201);
+}
 
-        if (!$extension) {
-            return response()->json(['message' => 'Extension not found'], 404);
-        }
+public function update(Request $request, $product_id, $extension_id)
+{
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string',
+        'data' => 'required|array',
+    ]);
 
-        $extension->update([
-            'name' => $request->input('name'),
-            'data' => $request->input('data'),
-        ]);
-
-        return response()->json(['extension' => $extension], 200);
+    if ($validator->fails()) {
+        return response()->json(['error' => $validator->errors()], 400);
     }
+
+    $extension = Extension::where('product_id', $product_id)
+        ->where('id', $extension_id)
+        ->first();
+
+    if (!$extension) {
+        return response()->json(['message' => 'Extension not found'], 404);
+    }
+
+    $extension->update([
+        'name' => $request->input('name'),
+        'data' => $request->input('data'),
+    ]);
+
+    return response()->json(['extension' => $extension], 200);
+}
 
     public function destroy($product_id, $extension_id)
     {

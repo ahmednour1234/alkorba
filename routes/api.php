@@ -32,8 +32,9 @@ use App\Http\Controllers\Api\StatusController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
-    Route::post('/logout', [AuthController::class, 'logout']);
-    //passwordupdate
+});
+Route::post('/logout', [AuthController::class, 'logout']);
+//passwordupdate
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.reset');
 Route::post('/password/verify-code', [PasswordResetController::class, 'verifyResetCode']);
 Route::post('/password/sendSmsForPasswordUpdate', [PasswordResetController::class, 'sendSmsForPasswordUpdate']);
@@ -85,11 +86,10 @@ Route::post('/deliveries', [DeliveryController::class, 'store']);
 Route::put('/deliveries/{id}', [DeliveryController::class, 'update']);
 Route::delete('/deliveries/{id}', [DeliveryController::class, 'destroy']);
 //status
-Route::get('/', [StatusController::class, 'index']); // Get all statuses
-Route::post('/', [StatusController::class, 'store']); // Create a new status
-Route::put('/{id}', [StatusController::class, 'update']); // Update an existing status
-Route::delete('/{id}', [StatusController::class, 'destroy']);
-});
+Route::get('/status', [StatusController::class, 'index']); // Get all statuses
+Route::post('/status', [StatusController::class, 'store']); // Create a new status
+Route::put('/status/{id}', [StatusController::class, 'update']); // Update an existing status
+Route::delete('/status/{id}', [StatusController::class, 'destroy']);
 //register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
